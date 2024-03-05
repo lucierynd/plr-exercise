@@ -7,6 +7,16 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import wandb
+import optuna
+
+def objective(trial):
+    x = trial.suggest_float('x', -10, 10)
+    return (x - 2) ** 2
+
+study = optuna.create_study()
+study.optimize(objective, n_trials=100)
+
+study.best_params  # E.g. {'x': 2.002108042}
 
 run = wandb.init(
     # Set the project where this run will be logged
