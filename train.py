@@ -6,6 +6,27 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+import wandb
+import optuna
+
+def objective(trial):
+    x = trial.suggest_float('x', -10, 10)
+    return (x - 2) ** 2
+
+study = optuna.create_study()
+study.optimize(objective, n_trials=100)
+
+study.best_params  # E.g. {'x': 2.002108042}
+
+run = wandb.init(
+    # Set the project where this run will be logged
+    project="my-awesome-project",
+    # Track hyperparameters and run metadata
+    config={
+        "learning_rate": 0.01,
+        "epochs": 10,
+    },
+)
 
 
 class Net(nn.Module):
@@ -81,6 +102,8 @@ def test(model, device, test_loader, epoch):
             test_loss, correct, len(test_loader.dataset), 100.0 * correct / len(test_loader.dataset)
         )
     )
+    wandb.log({"train_loss": test_loss})
+    
 
 
 def main():
